@@ -4,14 +4,20 @@ from telebot import types
 import instaloader
 import re
 
-from flask import flask 
-import treading
-app = flask('')
-@app.route('/')
-def home(): return " I am alive!"
+import os
+from flask import Flask
+import threading
 
-def run(): app.run(host="0.0.0.0',port=8080)
-                   treanding.Tread(target=run).srart()
+# تشغيل سيرفر ويب بسيط لإرضاء Koyeb
+app = Flask('')
+@app.route('/')
+def home(): return "Bot is Alive!"
+
+def run():
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)
+
+threading.Thread(target=run).start()
                    
 # ضع التوكن الخاص بك هنا
 TOKEN = '8580178191:AAFo3Dyf9ilw7Sz4Y9KgRKcuCEoXjvgQJUs'
@@ -75,4 +81,5 @@ def callback_query(call):
 print("البوت يعمل الآن بنجاح...")
 
 bot.polling(none_stop=True)
+
 
