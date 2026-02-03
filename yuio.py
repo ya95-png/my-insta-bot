@@ -3,6 +3,15 @@ from telebot import types
 import instaloader
 import re
 
+from flask import flask 
+import treading
+app = flask('')
+@app.route('/')
+def home(): return " I am alive"
+
+def run(): app.run(host="0.0.0.0',port=8080)
+                   treanding.Tread(target=run).srart()
+                   
 # ضع التوكن الخاص بك هنا
 TOKEN = '8580178191:AAFo3Dyf9ilw7Sz4Y9KgRKcuCEoXjvgQJUs'
 bot = telebot.TeleBot(TOKEN)
@@ -63,4 +72,5 @@ def callback_query(call):
         print(f"Error: {e}")
 
 print("البوت يعمل الآن بنجاح...")
+
 bot.polling()
