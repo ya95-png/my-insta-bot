@@ -1,3 +1,4 @@
+
 import telebot
 from telebot import types
 import instaloader
@@ -7,7 +8,7 @@ from flask import flask
 import treading
 app = flask('')
 @app.route('/')
-def home(): return " I am alive"
+def home(): return " I am alive!"
 
 def run(): app.run(host="0.0.0.0',port=8080)
                    treanding.Tread(target=run).srart()
@@ -73,4 +74,5 @@ def callback_query(call):
 
 print("البوت يعمل الآن بنجاح...")
 
-bot.polling()
+bot.polling(none_stop=True)
+
