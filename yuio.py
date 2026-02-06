@@ -8,8 +8,35 @@ import os
 from flask import Flask
 import threading
 import instaloader
-L = instaloader.instaloader()
-L.login("ya95ppp", "ya$$er12345")
+import random
+
+# قائمة بروكسيات (يمكنك تحديثها من المواقع التي ذكرناها)
+proxy_list = [
+    'http://161.35.70.242:3128',
+    'http://167.172.175.255:80',
+    'http://159.203.87.130:80',
+    'http://177.71.224.87',
+    'http://209.135.168.41',
+    'http://117.54.114.33',
+    'http://165.227.5.10',
+    'http://190.242.157.215'
+]
+
+def get_loader():
+    L = instaloader.Instaloader()
+    
+    # اختيار بروكسي عشوائي من القائمة
+    proxy = random.choice(proxy_list)
+    L.context.proxies = {'https': proxy}
+    
+    # تسجيل الدخول لزيادة الأمان (اختياري لكنه يقلل الحظر)
+    L.login("ya95ppp", "ya$$er12345") 
+    
+    return L
+
+# عند محاولة التحميل، استخدم هذه الوظيفة
+# loader = get_loader()
+# post = instaloader.Post.from_shortcode(loader.context, shortcode)
 
 import time
 time.sleep(5)
@@ -87,6 +114,7 @@ def callback_query(call):
 print("البوت يعمل الآن بنجاح...")
 
 bot.polling(none_stop=True)
+
 
 
 
