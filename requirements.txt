@@ -1,8 +1,7 @@
 pyTelegramBotAPI
-
-
 instagrapi
 flask
+
 
 
 
