@@ -1,8 +1,9 @@
 pyTelegramBotAPI
-time
-instaloader
+
+
 instagrapi
 flask
+
 
 
 
