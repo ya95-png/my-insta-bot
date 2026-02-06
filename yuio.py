@@ -11,18 +11,6 @@ import instaloader
 import random
 
 
-    # تسجيل الدخول لزيادة الأمان (اختياري لكنه يقلل الحظر)
-    import instaloader
-
-L = instaloader.Instaloader()
-
-# استبدل USERNAME باسم الحساب الجديد و PASSWORD بكلمة المرور
-try:
-    L.login("ya95ppp", "ya$$er12345") 
-    print("تم تسجيل الدخول بنجاح!")
-except Exception as e:
-    print(f"خطأ في تسجيل الدخول: {e}")
-
 # الآن البوت سيستخدم هوية هذا الحساب عند جلب الروابط
     
     return L
@@ -49,6 +37,18 @@ threading.Thread(target=run).start()
 TOKEN = '8580178191:AAFo3Dyf9ilw7Sz4Y9KgRKcuCEoXjvgQJUs'
 bot = telebot.TeleBot(TOKEN)
 L = instaloader.Instaloader()
+import instaloader
+   # تسجيل الدخول لزيادة الأمان (اختياري لكنه يقلل الحظر)
+    import instaloader
+
+L = instaloader.Instaloader()
+
+# استبدل USERNAME باسم الحساب الجديد و PASSWORD بكلمة المرور
+try:
+    L.login("ya95ppp", "ya$$er12345") 
+    print("تم تسجيل الدخول بنجاح!")
+except Exception as e:
+    print(f"خطأ في تسجيل الدخول: {e}")
 
 # دالة ذكية لاستخراج كود المنشور من أي رابط إنستغرام
 def get_shortcode(url):
@@ -107,6 +107,7 @@ def callback_query(call):
 print("البوت يعمل الآن بنجاح...")
 
 bot.polling(none_stop=True)
+
 
 
 
