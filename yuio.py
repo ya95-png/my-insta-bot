@@ -7,6 +7,10 @@ import re
 import os
 from flask import Flask
 import threading
+import instaloader
+L = instaloader.instaloader()
+L.login("ya95ppp", "ya$$er12345")
+
 
 # تشغيل سيرفر ويب بسيط لإرضاء Koyeb
 app = Flask('')
@@ -81,5 +85,6 @@ def callback_query(call):
 print("البوت يعمل الآن بنجاح...")
 
 bot.polling(none_stop=True)
+
 
 
