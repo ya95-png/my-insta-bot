@@ -1,117 +1,145 @@
+# ================== Imports ==================
+import os
+import re
+import time
+import random
+import threading
+from queue import Queue
 
+from flask import Flask
 import telebot
 from telebot import types
-import instaloader
-import re
+from instagrapi import Client
 
-import os
-from flask import Flask
-import threading
-import instaloader
-import random
+# ================== Environment ==================
+TOKEN = os.getenv("BOT_TOKEN")
+IG_USERNAME = os.getenv("IG_USERNAME")
+IG_PASSWORD = os.getenv("IG_PASSWORD")
 
+if not TOKEN:
+    raise RuntimeError("BOT_TOKEN is missing")
 
-# الآن البوت سيستخدم هوية هذا الحساب عند جلب الروابط
-    
-    return L
-
-# عند محاولة التحميل، استخدم هذه الوظيفة
-loader = get_loader()
- post = instaloader.Post.from_shortcode(loader.context, shortcode)
-
-import time
-time.sleep(5)
-
-# تشغيل سيرفر ويب بسيط لإرضاء Koyeb
-app = Flask('')
-@app.route('/')
-def home(): return "Bot is Alive!"
-
-def run():
-    port = int(os.environ.get('PORT', 8080))
-    app.run(host='0.0.0.0', port=port)
-
-threading.Thread(target=run).start()
-                   
-# ضع التوكن الخاص بك هنا
-TOKEN = '8580178191:AAFo3Dyf9ilw7Sz4Y9KgRKcuCEoXjvgQJUs'
+# ================== Telegram ==================
 bot = telebot.TeleBot(TOKEN)
-L = instaloader.Instaloader()
-import instaloader
-   # تسجيل الدخول لزيادة الأمان (اختياري لكنه يقلل الحظر)
-    import instaloader
 
-L = instaloader.Instaloader()
+# ================== Instagram Client ==================
+cl = Client()
 
-# استبدل USERNAME باسم الحساب الجديد و PASSWORD بكلمة المرور
-try:
-    L.login("ya95ppp", "ya$$er12345") 
-    print("تم تسجيل الدخول بنجاح!")
-except Exception as e:
-    print(f"خطأ في تسجيل الدخول: {e}")
+if os.path.exists("session.json"):
+    cl.load_settings("session.json")
+    cl.login_by_sessionid(cl.settings["sessionid"])
+else:
+    if not IG_USERNAME or not IG_PASSWORD:
+        raise RuntimeError("Instagram credentials missing for first login")
+    cl.login(IG_USERNAME, IG_PASSWORD)
+    cl.dump_settings("session.json")
 
-# دالة ذكية لاستخراج كود المنشور من أي رابط إنستغرام
-def get_shortcode(url):
-    pattern = r"/(?:p|reels|reel|tv)/([A-Za-z0-9_-]+)"
-    match = re.search(pattern, url)
-    if match:
-        return match.group(1)
-    return None
+# ================== Queue System ==================
+ig_queue = Queue()
 
-@bot.message_handler(commands=['start'])
+def ig_delay():
+    time.sleep(random.randint(8, 15))
+
+def ig_worker():
+    while True:
+        task = ig_queue.get()
+        if task is None:
+            break
+
+        func, args = task
+        try:
+            func(*args)
+        except Exception as e:
+            print("IG ERROR:", e)
+
+        ig_delay()
+        ig_queue.task_done()
+
+threading.Thread(target=ig_worker, daemon=True).start()
+
+# ================== Flask (Keep Alive for Koyeb) ==================
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Bot is Alive!"
+
+def run_web():
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
+
+threading.Thread(target=run_web, daemon=True).start()
+
+# ================== Helpers ==================
+def extract_instagram_url(text: str):
+    pattern = r"(https?://(?:www\.)?instagram\.com/[^\s]+)"
+    match = re.search(pattern, text)
+    return match.group(1) if match else None
+
+# ================== Telegram Handlers ==================
+@bot.message_handler(commands=["start"])
 def start(message):
-    bot.reply_to(message, "مرحباً! أرسل لي رابط إنستغرام (فيديو، ريلز، أو صورة) وسأقوم بتحميله.")
+    bot.reply_to(
+        message,
+        "👋 أهلاً\nأرسل رابط إنستغرام (بوست أو ريلز) وسيتم تحميله."
+    )
 
-@bot.message_handler(func=lambda message: "instagram.com" in message.text)
+@bot.message_handler(func=lambda m: m.text and "instagram.com" in m.text)
 def handle_instagram(message):
-    url = message.text
-    shortcode = get_shortcode(url)
-    
-    if not shortcode:
-        bot.reply_to(message, "عذراً، لم أستطع فهم هذا الرابط. تأكد أنه رابط منشور أو ريلز.")
+    url = extract_instagram_url(message.text)
+    if not url:
+        bot.reply_to(message, "❌ رابط غير صالح")
         return
 
-    # إنشاء الأزرار
+    try:
+        media_pk = cl.media_pk_from_url(url)
+    except Exception:
+        bot.reply_to(message, "⚠️ لا يمكن قراءة الرابط")
+        return
+
     markup = types.InlineKeyboardMarkup()
-    btn_download = types.InlineKeyboardButton("تحميل المحتوى 📥", callback_data=f"dl_{shortcode}")
-    btn_info = types.InlineKeyboardButton("معلومات المنشور ℹ️", callback_data=f"info_{shortcode}")
-    markup.add(btn_download, btn_info)
-    
-    bot.reply_to(message, "اختر ما تريد فعله:", reply_markup=markup)
+    markup.add(
+        types.InlineKeyboardButton("تحميل 📥", callback_data=f"dl_{media_pk}"),
+        types.InlineKeyboardButton("معلومات ℹ️", callback_data=f"info_{media_pk}")
+    )
+
+    bot.reply_to(message, "اختر العملية:", reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
-    # تقسيم البيانات المستلمة من الزر
-    action, shortcode = call.data.split("_")
-    chat_id = call.message.chat.id
-    
-    bot.answer_callback_query(call.id, "جاري المعالجة...")
-    
     try:
-        post = instaloader.Post.from_shortcode(L.context, shortcode)
-        
-        if action == "dl":
-            if post.is_video:
-                bot.send_video(chat_id, post.video_url, caption="تم التحميل  ✅")
-            else:
-                bot.send_photo(chat_id, post.display_url, caption="تم التحميل  ✅")
-        
-        elif action == "info":
-            info = f"👤 الناشر: {post.owner_username}\n❤️ الإعجابات: {post.likes}\n💬 التعليقات: {post.comments}"
-            bot.send_message(chat_id, info)
-            
-    except Exception as e:
-        bot.send_message(chat_id, f"حدث خطأ أثناء جلب البيانات. قد يكون الحساب خاصاً أو الرابط غير متاح.")
-        print(f"Error: {e}")
+        action, media_pk = call.data.split("_")
+        media_pk = int(media_pk)
+    except ValueError:
+        return
 
-print("البوت يعمل الآن بنجاح...")
+    chat_id = call.message.chat.id
+    bot.answer_callback_query(call.id, "⏳ تم إضافة الطلب للطابور")
 
+    if action == "dl":
+        ig_queue.put((process_download, (chat_id, media_pk)))
+    elif action == "info":
+        ig_queue.put((process_info, (chat_id, media_pk)))
+
+# ================== IG Tasks ==================
+def process_download(chat_id, media_pk):
+    media = cl.media_info(media_pk)
+
+    if media.media_type == 2:  # Video / Reel
+        bot.send_video(chat_id, media.video_url, caption="✅ تم التحميل")
+    else:
+        bot.send_photo(chat_id, media.thumbnail_url, caption="✅ تم التحميل")
+
+def process_info(chat_id, media_pk):
+    media = cl.media_info(media_pk)
+
+    info = (
+        f"👤 {media.user.username}\n"
+        f"❤️ {media.like_count}\n"
+        f"💬 {media.comment_count}"
+    )
+    bot.send_message(chat_id, info)
+
+# ================== Start ==================
+print("🤖 Bot is running...")
 bot.polling(none_stop=True)
-
-
-
-
-
-
-
-
