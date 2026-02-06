@@ -10,7 +10,7 @@ from flask import Flask
 import telebot
 from telebot import types
 from instagrapi import Client
-
+threading.Thread(target=run_web, daemon=True).start()
 # ================== Environment ==================
 TOKEN = os.getenv("BOT_TOKEN")
 IG_USERNAME = os.getenv("IG_USERNAME")
@@ -143,6 +143,7 @@ def process_info(chat_id, media_pk):
 # ================== Start ==================
 print("🤖 Bot is running...")
 bot.polling(none_stop=True)
+
 
 
 
