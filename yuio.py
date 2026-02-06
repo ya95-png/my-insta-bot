@@ -65,7 +65,7 @@ def home():
     return "Bot is Alive!"
 
 def run_web():
-    port = int(os.environ.get("PORT", 8080))
+    port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
 
 threading.Thread(target=run_web, daemon=True).start()
@@ -143,5 +143,6 @@ def process_info(chat_id, media_pk):
 # ================== Start ==================
 print("🤖 Bot is running...")
 bot.polling(none_stop=True)
+
 
 
