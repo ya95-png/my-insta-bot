@@ -1,8 +1,9 @@
-pyTelegramBotAPI==4.10.1
+pyTelegramBotAPI
 time
 
 instaloader
 flask
+
 
 
 
