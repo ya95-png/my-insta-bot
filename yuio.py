@@ -35,8 +35,8 @@ def get_loader():
     return L
 
 # عند محاولة التحميل، استخدم هذه الوظيفة
-# loader = get_loader()
-# post = instaloader.Post.from_shortcode(loader.context, shortcode)
+loader = get_loader()
+ post = instaloader.Post.from_shortcode(loader.context, shortcode)
 
 import time
 time.sleep(5)
@@ -114,6 +114,7 @@ def callback_query(call):
 print("البوت يعمل الآن بنجاح...")
 
 bot.polling(none_stop=True)
+
 
 
 
