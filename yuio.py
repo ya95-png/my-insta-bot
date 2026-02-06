@@ -10,27 +10,20 @@ import threading
 import instaloader
 import random
 
-# قائمة بروكسيات (يمكنك تحديثها من المواقع التي ذكرناها)
-proxy_list = [
-    'http://161.35.70.242:3128',
-    'http://167.172.175.255:80',
-    'http://159.203.87.130:80',
-    'http://177.71.224.87',
-    'http://209.135.168.41',
-    'http://117.54.114.33',
-    'http://165.227.5.10',
-    'http://190.242.157.215'
-]
 
-def get_loader():
-    L = instaloader.Instaloader()
-    
-    # اختيار بروكسي عشوائي من القائمة
-    proxy = random.choice(proxy_list)
-    L.context.proxies = {'https': proxy}
-    
     # تسجيل الدخول لزيادة الأمان (اختياري لكنه يقلل الحظر)
+    import instaloader
+
+L = instaloader.Instaloader()
+
+# استبدل USERNAME باسم الحساب الجديد و PASSWORD بكلمة المرور
+try:
     L.login("ya95ppp", "ya$$er12345") 
+    print("تم تسجيل الدخول بنجاح!")
+except Exception as e:
+    print(f"خطأ في تسجيل الدخول: {e}")
+
+# الآن البوت سيستخدم هوية هذا الحساب عند جلب الروابط
     
     return L
 
@@ -114,6 +107,7 @@ def callback_query(call):
 print("البوت يعمل الآن بنجاح...")
 
 bot.polling(none_stop=True)
+
 
 
 
