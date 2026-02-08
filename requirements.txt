@@ -1,5 +1,4 @@
 Flask
 pyTelegramBotAPI
-instagrapi
-Pillow
 gunicorn
+yt-dlp
