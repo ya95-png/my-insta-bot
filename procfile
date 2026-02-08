@@ -1,1 +1,0 @@
-web: hunicorn --bind :$PORT --workers 1 main:app
