@@ -368,10 +368,14 @@ def setup_webhook():
     time.sleep(1)
     bot.set_webhook(url=WEBHOOK_URL)
     print("✅ Webhook set to:", WEBHOOK_URL)
+try:
+    setup_webhook()
+except Exception as e:
+    print("⚠️ Webhook setup failed:", e)
 
-setup_webhook()
 
 # ================== Run ==================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
