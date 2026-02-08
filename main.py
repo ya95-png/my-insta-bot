@@ -38,42 +38,35 @@ WEBHOOK_URL = PUBLIC_URL.rstrip("/") + WEBHOOK_PATH
 bot = telebot.TeleBot(TOKEN, threaded=True)
 
 # ================== Instagram ==================
-cl = Client()
-
-def safe_remove(path: str):
-    if path:
-        with suppress(Exception):
-            os.remove(path)
+IG_SESSIONID = os.getenv("IG_SESSIONID")
 
 def ig_login() -> bool:
     """
-    Try login WITHOUT crashing app.
-    Returns True if logged in, False otherwise.
+    Login using IG_SESSIONID only.
+    Safe: never crashes the service.
     """
     try:
-        if os.path.exists("session.json"):
-            try:
-                cl.load_settings("session.json")
-                if IG_USERNAME and IG_PASSWORD:
-                    cl.login(IG_USERNAME, IG_PASSWORD, relogin=True)
-                else:
-                    cl.login_by_sessionid(cl.settings.get("sessionid"))
-                cl.dump_settings("session.json")
-                return True
-            except Exception as e:
-                print("Session login failed:", e)
-
-        if not IG_USERNAME or not IG_PASSWORD:
-            print("⚠️ Instagram credentials missing")
+        if not IG_SESSIONID:
+            print("⚠️ IG_SESSIONID is missing")
             return False
 
-        cl.login(IG_USERNAME, IG_PASSWORD)
-        cl.dump_settings("session.json")
+        # Load settings if exists (optional)
+        if os.path.exists("session.json"):
+            with suppress(Exception):
+                cl.load_settings("session.json")
+
+        cl.login_by_sessionid(IG_SESSIONID)
+
+        # Save settings to reuse (optional)
+        with suppress(Exception):
+            cl.dump_settings("session.json")
+
         return True
 
     except Exception as e:
-        print("⚠️ Instagram login failed:", e)
+        print("⚠️ Instagram session login failed:", e)
         return False
+
 
 # ================== Queues ==================
 tg_queue: Queue = Queue()
@@ -332,3 +325,4 @@ setup_webhook()
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
