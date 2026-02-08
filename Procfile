@@ -1,1 +1,0 @@
-wrker: python yuio.py
